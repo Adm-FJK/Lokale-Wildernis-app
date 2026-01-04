@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { X, ExternalLink, BookOpen, ShieldAlert, Landmark } from 'lucide-react';
+import { X, ExternalLink, BookOpen, ShieldAlert, Info, Landmark } from 'lucide-react';
 import { SpeciesRecord, SpeciesDetail as SpeciesDetailType, Category } from '../types';
 import { getSpeciesInfo } from '../services/knowledgeService';
 import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from '../services/wikiService';

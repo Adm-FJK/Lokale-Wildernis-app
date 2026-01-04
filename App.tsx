@@ -1,19 +1,38 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Search, MapPin, X, Navigation, ChevronDown, ChevronUp, 
-  Bird, Bug, ShieldAlert, Calendar, Info, Snowflake 
+  Search, 
+  MapPin, 
+  X, 
+  Navigation, 
+  ChevronDown, 
+  ChevronUp, 
+  Bird, 
+  Bug, 
+  ShieldAlert, 
+  Calendar, 
+  Info, 
+  Snowflake 
 } from 'lucide-react';
-import { Category, SpeciesRecord, City } from './types';
+import { City, Category, SpeciesRecord } from './types';
 import { MONTHS } from './constants';
 import { fetchTopSpecies } from './services/gbifService';
-import { fetchEndangeredSpecies } from './services/nbaService';
+import { fetchEndangeredSpecies, IUCN_INFO } from './services/nbaService';
 import { searchDutchCities } from './services/locationService';
 import LoadingScreen from './components/LoadingScreen';
 import SpeciesDetail from './components/SpeciesDetail';
 
-const ButterflyIcon = ({ size = 24, className = "" }: { size?: number, className?: string }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+const ButterflyIcon = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round"
+    className={className}
+  >
     <path d="M12 11c1 0 1.5 1.5 1.5 3c0 2-1 3.5-1.5 3.5s-1.5-1.5-1.5-3.5c0-1.5.5-3 1.5-3z" />
     <path d="M11 11c-.5-2-1.5-3-3.5-3.5" />
     <path d="M13 11c.5-2-1.5-3 3.5-3.5" />
@@ -29,11 +48,12 @@ const App: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<Category | null>(null);
   const [speciesList, setSpeciesList] = useState<(SpeciesRecord & { dutchName?: string })[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [selectedSpecies, setSelectedSpecies] = useState<(SpeciesRecord & { dutchName?: string }) | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showIucnLegend, setShowIucnLegend] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isMonthMenuOpen, setIsMonthMenuOpen] = useState(false);
   
@@ -41,14 +61,20 @@ const App: React.FC = () => {
   const categoryRef = useRef<HTMLDivElement>(null);
   const monthRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
-  const searchTimeout = useRef<any>(null);
+  const searchTimeout = useRef<number | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (searchRef.current && !searchRef.current.contains(target)) setIsSearching(false);
-      if (categoryRef.current && !categoryRef.current.contains(target)) setIsCategoryMenuOpen(false);
-      if (monthRef.current && !monthRef.current.contains(target)) setIsMonthMenuOpen(false);
+      if (searchRef.current && !searchRef.current.contains(target)) {
+        setIsSearching(false);
+      }
+      if (categoryRef.current && !categoryRef.current.contains(target)) {
+        setIsCategoryMenuOpen(false);
+      }
+      if (monthRef.current && !monthRef.current.contains(target)) {
+        setIsMonthMenuOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -76,20 +102,29 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    if (selectedCity && selectedMonth && activeCategory) {
-      loadData();
-      setTimeout(() => mainRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
-    }
+    if (!selectedCity || !selectedMonth || !activeCategory) return;
+
+    loadData();
+    setShowIucnLegend(false);
+    
+    const scrollTimer = setTimeout(() => {
+      if (mainRef.current) {
+        mainRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 150);
+
+    return () => clearTimeout(scrollTimer);
   }, [selectedCity, selectedMonth, activeCategory]);
 
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
     if (searchTimeout.current) clearTimeout(searchTimeout.current);
+    
     if (val.trim().length >= 2) {
-      searchTimeout.current = setTimeout(async () => {
+      searchTimeout.current = window.setTimeout(async () => {
         const results = await searchDutchCities(val);
         setSearchResults(results);
-      }, 500);
+      }, 500); 
     } else {
       setSearchResults([]);
     }
@@ -98,9 +133,15 @@ const App: React.FC = () => {
   const useCurrentLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition((pos) => {
-        setSelectedCity({ name: 'Mijn Locatie', lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setSelectedCity({
+          name: 'Mijn Locatie',
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude
+        });
         setIsSearching(false);
         setSearchQuery('');
+      }, (err) => {
+        alert("Locatie toegang geweigerd.");
       });
     }
   };
@@ -111,11 +152,14 @@ const App: React.FC = () => {
       case Category.BIRDS: return <Bird size={size} className={className} />;
       case Category.BUTTERFLIES: return <ButterflyIcon size={size} className={className} />;
       case Category.INSECTS: return <Bug size={size} className={className} />;
-      case Category.ENDANGERED: 
+      case Category.ENDANGERED: return <ShieldAlert size={size} className={className} />;
       case Category.ENDANGERED_NL: return <ShieldAlert size={size} className={className} />;
-      default: return <Search size={size} className={className} />;
     }
   };
+
+  const isWinterMonth = selectedMonth ? (selectedMonth >= 11 || selectedMonth <= 2) : false;
+  const isInsectCategory = activeCategory === Category.BUTTERFLIES || activeCategory === Category.INSECTS;
+  const isEndangeredCategory = activeCategory === Category.ENDANGERED || activeCategory === Category.ENDANGERED_NL;
 
   return (
     <div className="min-h-screen bg-[#FDFDFB] pb-40">
@@ -125,121 +169,336 @@ const App: React.FC = () => {
             <div className="w-10 h-1 bg-emerald-500"></div>
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-400">Data gedreven natuurgids</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tighter mb-8 leading-[0.9] uppercase max-w-2xl">Lokale<br />wildernis</h1>
-          <p className="text-lg md:text-xl text-stone-400 font-serif italic max-w-xl leading-relaxed">Ontdek de top 15 meest waargenomen soorten van deze maand.</p>
+          <h1 className="text-4xl md:text-6xl font-serif font-bold tracking-tighter mb-8 leading-[0.9] uppercase max-w-2xl">
+            Lokale<br />wildernis
+          </h1>
+          <p className="text-lg md:text-xl text-stone-400 font-serif italic max-w-xl leading-relaxed">
+            Ontdek de top 15 meest waargenomen soorten van deze maand, berekend op basis van recente natuur data (<a href="https://www.gbif.org/country/NL/summary" target="_blank" rel="noopener noreferrer" className="underline decoration-stone-600 hover:text-emerald-400 transition-colors">GBIF</a>, 2023-2025). Welke soorten kan je deze maand verwachten?
+          </p>
         </div>
       </section>
 
-      <div className="sticky top-0 z-40 bg-stone-100 border-b border-stone-200">
-        <div className="max-w-screen-xl mx-auto px-0 md:px-4 md:py-6 flex flex-col md:flex-row md:gap-4">
-          <div className="flex border-b md:border-0 border-stone-200 h-16 md:h-20 md:flex-1 md:gap-4">
-            <div ref={searchRef} className="flex-1 relative border-r md:border border-stone-200 md:bg-white transition-all">
-              {isSearching ? (
-                <div className="absolute inset-0 bg-white z-50 flex items-center px-4">
-                  <Search size={16} className="text-emerald-600 mr-3" />
-                  <input type="text" placeholder="Kies een locatie" autoFocus className="w-full outline-none text-xs font-bold uppercase" value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)} />
-                  <button onClick={() => setIsSearching(false)} className="p-2"><X size={16} /></button>
-                </div>
-              ) : (
-                <button onClick={() => setIsSearching(true)} className="w-full h-full flex items-center gap-3 px-6 text-left">
-                  <MapPin size={16} className="text-emerald-600" />
-                  <div>
-                    <span className="block text-[7px] font-black uppercase">Locatie</span>
-                    <span className="block text-xs font-bold uppercase">{selectedCity ? selectedCity.name : 'Kies locatie'}</span>
+      <div className="sticky top-0 z-40 bg-stone-100 border-b border-stone-200 shadow-sm md:shadow-none">
+        <div className="max-w-screen-xl mx-auto px-0 md:px-4 md:py-6">
+          <div className="flex flex-col md:flex-row md:gap-4">
+            
+            <div className="flex border-b md:border-0 border-stone-200 h-16 md:h-20 md:flex-1 md:gap-4">
+              
+              <div ref={searchRef} className="flex-1 relative border-r md:border border-stone-200 md:bg-white md:rounded-sm md:shadow-sm transition-all hover:shadow-md group">
+                {isSearching ? (
+                  <div className="absolute inset-0 bg-white md:rounded-sm z-50 flex items-center px-4 md:px-6">
+                    <Search size={16} className="text-emerald-600 mr-3" />
+                    <input 
+                      type="text"
+                      placeholder="Kies een locatie"
+                      autoFocus
+                      className="w-full bg-transparent outline-none font-bold uppercase tracking-wider text-xs text-stone-900 placeholder:text-stone-400"
+                      value={searchQuery}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                    />
+                    <button onClick={() => setIsSearching(false)} className="p-2 text-stone-400 hover:text-stone-900">
+                      <X size={16} />
+                    </button>
                   </div>
-                </button>
-              )}
-              {isSearching && (searchQuery || searchResults.length > 0) && (
-                <div className="absolute top-full left-0 right-0 bg-white border shadow-2xl z-[60] mt-2 max-h-80 overflow-y-auto">
-                  <button onClick={useCurrentLocation} className="w-full flex items-center gap-3 p-4 hover:bg-emerald-50 text-[9px] font-black uppercase">
-                    <Navigation size={12} /> Huidige locatie
-                  </button>
-                  {searchResults.map(city => (
-                    <div key={`${city.lat}-${city.lng}`} onClick={() => { setSelectedCity(city); setIsSearching(false); }} className="p-4 hover:bg-stone-900 hover:text-white cursor-pointer border-b">
-                      <span className="font-bold uppercase text-[11px]">{city.name}</span>
+                ) : (
+                  <button 
+                    onClick={() => setIsSearching(true)}
+                    className="w-full h-full flex items-center gap-3 px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left"
+                  >
+                    <MapPin size={16} className="text-emerald-600 flex-shrink-0" />
+                    <div className="truncate">
+                      <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0">Locatie</span>
+                      <span className={`block text-xs font-bold uppercase tracking-wider truncate ${!selectedCity ? 'text-stone-400' : 'text-stone-900'}`}>
+                        {selectedCity ? selectedCity.name : 'Kies een locatie'}
+                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </button>
+                )}
+
+                {isSearching && (searchQuery.trim().length >= 1 || searchResults.length > 0) && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-[60] mt-2 max-h-80 overflow-y-auto animate-fadeIn">
+                    <button 
+                      onClick={useCurrentLocation}
+                      className="w-full flex items-center gap-3 p-4 hover:bg-emerald-50 text-emerald-800 font-black transition-colors border-b border-stone-100 uppercase text-[9px] tracking-widest"
+                    >
+                      <Navigation size={12} />
+                      Huidige locatie
+                    </button>
+                    {searchResults.map(city => (
+                      <div 
+                        key={`${city.lat}-${city.lng}-${city.name}`}
+                        onClick={() => {
+                          setSelectedCity(city);
+                          setIsSearching(false);
+                          setSearchQuery('');
+                          setSearchResults([]);
+                        }}
+                        className="p-4 hover:bg-stone-900 hover:text-white cursor-pointer transition-colors border-b border-stone-50 flex flex-col"
+                      >
+                        <span className="font-bold uppercase tracking-wider text-[11px]">{city.name}</span>
+                        {city.fullName && city.fullName !== city.name && <span className="text-[9px] opacity-60 italic">{city.fullName}</span>}
+                      </div>
+                    ))}
+                    {searchQuery.trim().length >= 2 && searchResults.length === 0 && (
+                      <div className="p-4 text-[10px] text-stone-400 uppercase tracking-widest text-center italic">
+                        Zoeken...
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div ref={monthRef} className="relative flex-1 md:bg-white md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md h-full">
+                <button
+                  onClick={() => setIsMonthMenuOpen(!isMonthMenuOpen)}
+                  className="w-full h-full flex items-center justify-between px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left"
+                >
+                  <div className="truncate">
+                    <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0">Maand</span>
+                    <span className={`block text-xs font-bold uppercase tracking-wider truncate ${!selectedMonth ? 'text-stone-400' : 'text-stone-900'}`}>
+                      {selectedMonth ? MONTHS[selectedMonth - 1] : 'Selecteer maand'}
+                    </span>
+                  </div>
+                  <ChevronDown className={`text-stone-400 transition-transform duration-300 ${isMonthMenuOpen ? 'rotate-180' : ''}`} size={14} />
+                </button>
+
+                {isMonthMenuOpen && (
+                  <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-[60] mt-2 max-h-80 overflow-y-auto animate-fadeIn">
+                    {MONTHS.map((m, i) => (
+                      <button
+                        key={m}
+                        onClick={() => {
+                          setSelectedMonth(i + 1);
+                          setIsMonthMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-4 p-4 transition-colors border-b border-stone-50 last:border-0 ${
+                          selectedMonth === i + 1 ? 'bg-emerald-50 text-emerald-900 font-bold' : 'hover:bg-stone-50 text-stone-600'
+                        }`}
+                      >
+                        <span className="font-bold uppercase tracking-widest text-[10px]">
+                          {m}
+                        </span>
+                        {selectedMonth === i + 1 && (
+                          <div className="ml-auto w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
-            <div ref={monthRef} className="relative flex-1 md:bg-white md:border border-stone-200 h-full">
-              <button onClick={() => setIsMonthMenuOpen(!isMonthMenuOpen)} className="w-full h-full flex items-center justify-between px-6 text-left">
-                <div>
-                  <span className="block text-[7px] font-black uppercase">Maand</span>
-                  <span className="block text-xs font-bold uppercase">{selectedMonth ? MONTHS[selectedMonth - 1] : 'Selecteer maand'}</span>
+            <div ref={categoryRef} className="relative bg-stone-50 md:bg-white md:flex-1 md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md border-b md:border-b border-stone-200 h-14 md:h-20">
+              <button
+                onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
+                className="w-full h-full flex items-center justify-between px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-emerald-600">
+                    <CategoryIcon cat={activeCategory} size={16} />
+                  </div>
+                  <div>
+                    <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0">Wat zoek je?</span>
+                    <span className={`block text-xs font-bold uppercase tracking-wider ${!activeCategory ? 'text-stone-400' : 'text-stone-900'}`}>
+                      {activeCategory || 'Maak een keuze...'}
+                    </span>
+                  </div>
                 </div>
-                <ChevronDown size={14} className={isMonthMenuOpen ? 'rotate-180' : ''} />
+                <ChevronDown className={`text-stone-400 transition-transform duration-300 ${isCategoryMenuOpen ? 'rotate-180' : ''}`} size={16} />
               </button>
-              {isMonthMenuOpen && (
-                <div className="absolute top-full left-0 right-0 bg-white border shadow-2xl z-[60] mt-2 max-h-80 overflow-y-auto">
-                  {MONTHS.map((m, i) => (
-                    <button key={m} onClick={() => { setSelectedMonth(i + 1); setIsMonthMenuOpen(false); }} className="w-full p-4 border-b text-[10px] font-bold uppercase hover:bg-emerald-50">
-                      {m}
+
+              {isCategoryMenuOpen && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-50 mt-2 animate-fadeIn overflow-hidden">
+                  {(Object.values(Category) as Category[]).map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        setActiveCategory(cat);
+                        setIsCategoryMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-4 p-5 transition-colors border-b border-stone-50 last:border-0 ${
+                        activeCategory === cat ? 'bg-emerald-50 text-emerald-900' : 'hover:bg-stone-50 text-stone-600'
+                      }`}
+                    >
+                      <div className={activeCategory === cat ? 'text-emerald-600' : 'text-stone-400'}>
+                        <CategoryIcon cat={cat} size={16} />
+                      </div>
+                      <span className="font-bold uppercase tracking-widest text-[10px]">
+                        {cat}
+                      </span>
+                      {activeCategory === cat && (
+                        <div className="ml-auto w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                      )}
                     </button>
                   ))}
                 </div>
               )}
             </div>
           </div>
-
-          <div ref={categoryRef} className="relative bg-stone-50 md:bg-white md:flex-1 md:border border-stone-200 h-14 md:h-20">
-            <button onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)} className="w-full h-full flex items-center justify-between px-6 text-left">
-              <div className="flex items-center gap-3">
-                <CategoryIcon cat={activeCategory} size={16} className="text-emerald-600" />
-                <div>
-                  <span className="block text-[7px] font-black uppercase">Wat zoek je?</span>
-                  <span className="block text-xs font-bold uppercase">{activeCategory || 'Maak keuze...'}</span>
-                </div>
-              </div>
-              <ChevronDown size={16} className={isCategoryMenuOpen ? 'rotate-180' : ''} />
-            </button>
-            {isCategoryMenuOpen && (
-              <div className="absolute top-full left-0 right-0 bg-white border shadow-2xl z-50 mt-2">
-                {Object.values(Category).map((cat) => (
-                  <button key={cat} onClick={() => { setActiveCategory(cat); setIsCategoryMenuOpen(false); }} className="w-full flex items-center gap-4 p-5 border-b hover:bg-emerald-50 text-[10px] font-bold uppercase">
-                    <CategoryIcon cat={cat} size={16} /> {cat}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
-      <main ref={mainRef} className="bg-white">
+      <main ref={mainRef} className="bg-white scroll-mt-32 md:scroll-mt-40">
         <div className="max-w-screen-xl mx-auto p-4 md:p-12">
-          {!selectedCity || !selectedMonth || !activeCategory ? (
-            <div className="py-24 flex flex-col items-center text-center opacity-40">
-              <Info size={48} className="mb-6" />
-              <h2 className="text-2xl font-serif font-bold uppercase">Maak een selectie hierboven</h2>
+          {!selectedCity ? (
+            <div className="py-24 md:py-40 flex flex-col items-center text-center animate-fadeIn">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-8 border border-emerald-100">
+                <MapPin size={24} className="text-emerald-600" />
+              </div>
+              <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Kies een Locatie</h2>
+              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">
+                Selecteer je locatie om lokale waarnemingen te ontdekken
+              </p>
+            </div>
+          ) : !selectedMonth ? (
+            <div className="py-24 md:py-40 flex flex-col items-center text-center animate-fadeIn">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-8 border border-emerald-100">
+                <Calendar size={24} className="text-emerald-600" />
+              </div>
+              <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Selecteer Maand</h2>
+              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">
+                Voor welke periode wilt u de lokale natuur bekijken?
+              </p>
+            </div>
+          ) : !activeCategory ? (
+            <div className="py-24 md:py-40 flex flex-col items-center text-center animate-fadeIn">
+              <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-8 border border-emerald-100">
+                <CategoryIcon cat={null} size={24} className="text-emerald-600" />
+              </div>
+              <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Kies een Categorie</h2>
+              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">
+                Selecteer hierboven wat je wilt ontdekken in {selectedCity.name}
+              </p>
             </div>
           ) : loading ? (
             <LoadingScreen />
           ) : (
             <>
-              <div className="mb-8 border-b-2 border-stone-900 pb-8">
-                <h2 className="text-5xl font-serif font-bold tracking-tighter mb-3">{selectedCity.name}</h2>
-                <div className="flex items-center gap-3 text-[10px] font-black uppercase text-stone-400">
-                  <span className="text-emerald-600">{activeCategory}</span>
-                  <span>•</span>
-                  <span>{MONTHS[selectedMonth - 1]}</span>
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between border-b-2 border-stone-900 pb-8 gap-4">
+                <div>
+                  <h2 className="text-5xl font-serif font-bold tracking-tighter leading-none mb-3 text-stone-900">
+                    {selectedCity.name}
+                  </h2>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${isEndangeredCategory ? 'bg-red-50 text-red-600 border-red-100' : 'bg-stone-100 text-stone-500 border-stone-200'}`}>
+                      {activeCategory}
+                    </span>
+                    <span className="text-stone-300">•</span>
+                    <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">
+                      {selectedMonth ? MONTHS[selectedMonth - 1] : ''}
+                    </span>
+                  </div>
                 </div>
+                {isEndangeredCategory && (
+                  <div className="flex flex-col items-end">
+                    <button 
+                      onClick={() => setShowIucnLegend(!showIucnLegend)}
+                      className="text-[10px] font-black text-stone-400 uppercase tracking-widest flex items-center gap-2 hover:text-stone-900 transition-colors group p-2 -mr-2"
+                    >
+                      <Info size={14} className="text-stone-400 group-hover:text-emerald-600" /> Rode Lijstcategorieën
+                      {showIucnLegend ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                    </button>
+                  </div>
+                )}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-8 gap-y-16">
+
+              {activeCategory === Category.ENDANGERED && !loading && speciesList.length > 0 && (
+                <div className="mb-12 animate-fadeIn">
+                  <p className="text-xl md:text-2xl text-stone-800 leading-relaxed font-serif italic border-l-4 border-red-500 pl-6 py-2">
+                    Overzicht van soorten die op deze locatie zijn waargenomen met een internationaal bedreigde status volgens de IUCN
+                  </p>
+                </div>
+              )}
+
+              {activeCategory === Category.ENDANGERED_NL && !loading && speciesList.length > 0 && (
+                <div className="mb-12 animate-fadeIn">
+                  <p className="text-xl md:text-2xl text-stone-800 leading-relaxed font-serif italic border-l-4 border-red-500 pl-6 py-2">
+                    Overzicht van soorten die op deze locatie zijn waargenomen en op de Nederlandse Rode Lijst staan
+                  </p>
+                </div>
+              )}
+
+              {isEndangeredCategory && showIucnLegend && (
+                <div className="mb-12 bg-white border border-stone-200 rounded-xl p-6 shadow-xl animate-fadeIn">
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-4 flex items-center gap-2">
+                    <ShieldAlert size={14} className="text-red-500" /> Informatie: Rode Lijstcategorieën
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    {Object.entries(IUCN_INFO).map(([code, info]) => (
+                      <div key={code} className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="px-1.5 py-0.5 bg-red-50 text-red-600 text-[9px] font-black rounded border border-red-100">{code}</span>
+                          <span className="text-xs font-bold text-stone-900 uppercase tracking-tight">{info.label}</span>
+                        </div>
+                        <p className="text-[10px] text-stone-400 italic font-serif leading-tight">{info.english}</p>
+                        <p className="text-[10px] text-stone-600 leading-snug">{info.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {isInsectCategory && isWinterMonth && (
+                <div className="mb-12 bg-stone-50 border-l-4 border-stone-300 p-8 flex items-start gap-6 animate-fadeIn">
+                  <Snowflake size={24} className="text-stone-400 shrink-0 mt-1" />
+                  <div>
+                    <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-stone-400 mb-2 text-left">Seizoensnotitie</h4>
+                    <p className="text-lg font-serif italic text-stone-600 leading-relaxed text-left">
+                      In de winter zijn de meeste insecten in rust. Je vindt ze dan niet in de lucht, maar verscholen als eitje, pop of larve. De waarnemingen in deze lijst kunnen daarom ook betrekking hebben op deze (onvolwassen) rustende stadia. Sommige soorten overwinteren als volwassen insect.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-8 gap-y-16 animate-fadeIn">
                 {speciesList.map((species, index) => (
-                  <div key={species.key} onClick={() => setSelectedSpecies(species)} className="group cursor-pointer">
-                    <div className="relative aspect-square mb-5 border overflow-hidden shadow-sm group-hover:border-emerald-600 transition-all">
-                      <img src={species.imageUrl} alt={species.scientificName} className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all" />
-                      <div className="absolute top-0 left-0 bg-white/90 px-3 py-1 text-xs font-serif italic border-b border-r">{(index + 1).toString().padStart(2, '0')}</div>
+                  <div 
+                    key={species.key}
+                    onClick={() => setSelectedSpecies(species)}
+                    className="group cursor-pointer flex flex-col"
+                  >
+                    <div className="relative aspect-square mb-5 bg-stone-100 border border-stone-200 overflow-hidden transition-all duration-500 group-hover:border-emerald-600 shadow-sm group-hover:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)]">
+                      <img 
+                        src={species.imageUrl} 
+                        alt={species.scientificName}
+                        className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 group-hover:scale-105"
+                        loading="lazy"
+                      />
+                      
+                      <div className="absolute top-0 left-0 bg-white/95 backdrop-blur-sm px-3 py-1 border-b border-r border-stone-100 z-10 shadow-sm">
+                        <span className="text-stone-900 text-sm md:text-base font-serif font-bold italic tracking-tight">
+                          {(index + 1).toString().padStart(2, '0')}
+                        </span>
+                      </div>
                     </div>
-                    <h3 className="font-serif font-bold text-lg leading-tight mb-1">{species.dutchName}</h3>
-                    <p className="text-[10px] text-stone-400 italic mb-2">{species.scientificName}</p>
-                    {species.conservationStatus && (
-                      <span className="inline-block px-2 py-0.5 text-[8px] font-black uppercase border rounded bg-red-50 text-red-600">{species.conservationStatus}</span>
-                    )}
+                    
+                    <div className="px-1 flex-1 flex flex-col">
+                      <h3 className="text-stone-900 font-bold text-lg leading-tight tracking-tighter font-serif mb-1 group-hover:text-emerald-700 transition-colors">
+                        {species.dutchName}
+                      </h3>
+                      <p className="text-[11px] text-stone-400 italic font-serif leading-none tracking-tight mb-3">
+                        {species.scientificName}
+                      </p>
+                      {species.conservationStatus && (
+                        <div className="mt-auto">
+                          <span className={`inline-block px-2 py-0.5 text-[8px] font-black uppercase tracking-widest rounded border ${isEndangeredCategory ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-700 border-emerald-100'}`}>
+                            {species.conservationStatus}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ))}
+
+                {speciesList.length === 0 && (
+                  <div className="col-span-full py-40 text-center border-2 border-dashed border-stone-200 rounded-lg">
+                    <div className="flex flex-col items-center">
+                      <Info size={48} className="mb-6 text-stone-200" />
+                      <p className="text-stone-400 font-serif italic text-2xl mb-2">Geen resultaten gevonden</p>
+                      <p className="text-stone-300 text-[9px] uppercase tracking-widest font-black">Probeer een andere stad of periode</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -249,8 +508,8 @@ const App: React.FC = () => {
       <SpeciesDetail 
         species={selectedSpecies} 
         onClose={() => setSelectedSpecies(null)} 
-        activeCategory={activeCategory || undefined}
-        currentMonth={selectedMonth || undefined}
+        activeCategory={activeCategory || Category.BIRDS}
+        currentMonth={selectedMonth || 0}
       />
     </div>
   );

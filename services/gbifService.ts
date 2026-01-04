@@ -48,7 +48,7 @@ export const fetchTopSpecies = async (
 
           let dutchName = wiki?.name;
           if (!dutchName) {
-            const local = SPECIES_KNOWLEDGE[cleanKey.toLowerCase()];
+            const local = SPECIES_KNOWLEDGE[cleanKey];
             if (local) dutchName = local.dutchName;
           }
 
