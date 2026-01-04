@@ -33,7 +33,12 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Babel laadt nu enkel index.tsx, waarin de volledige app zit -->
-    <script type="text/babel" data-type="module" src="./index.tsx"></script>
+    <!-- data-presets is CRUCIAAL voor externe .tsx bestanden -->
+    <script 
+      type="text/babel" 
+      data-type="module" 
+      data-presets="react,typescript" 
+      src="./index.tsx"
+    ></script>
   </body>
 </html>

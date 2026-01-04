@@ -45,12 +45,11 @@ const getRedListNLMap = async (): Promise<Map<string, { status: string, link?: s
   let fullData: any[] = [];
   
   try {
-    // Stap 1: Probeer het lokale bestand (werkt op Vercel)
-    const localRes = await fetch('./data/redlist_full.json');
+    // Gebruik de juiste bestandsnaam redlist_nl.json
+    const localRes = await fetch('./data/redlist_nl.json');
     if (localRes.ok) {
       fullData = await localRes.json();
     } else {
-      // Stap 2: Als lokaal niet lukt (AI Studio), probeer de GitHub link
       if (GITHUB_REDLIST_RAW_URL && GITHUB_REDLIST_RAW_URL !== "JOUW_GITHUB_RAW_URL_HIER") {
         const remoteRes = await fetch(GITHUB_REDLIST_RAW_URL);
         if (remoteRes.ok) fullData = await remoteRes.json();

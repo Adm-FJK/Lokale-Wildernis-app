@@ -1,6 +1,6 @@
 
 {
-  "cleanUrls": true,
+  "cleanUrls": false,
   "headers": [
     {
       "source": "/(.*)\\.(tsx|ts)",
@@ -12,7 +12,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!.*\\.(?:tsx|ts|js|css|json|png|jpg|svg)).*)",
+      "source": "/((?!.*\\.).*)",
       "destination": "/index.html"
     }
   ]
