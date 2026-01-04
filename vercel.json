@@ -1,18 +1,10 @@
 
 {
   "cleanUrls": true,
-  "headers": [
-    {
-      "source": "/(.*)\\.(tsx|ts|jsx)",
-      "headers": [
-        { "key": "Content-Type", "value": "application/javascript; charset=utf-8" },
-        { "key": "Cache-Control", "value": "no-cache" }
-      ]
-    }
-  ],
+  "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/((?!.*\\.).*)",
+      "source": "/((?!assets/|data/|favicon|.*\\.).*)",
       "destination": "/index.html"
     }
   ]

@@ -1,8 +1,8 @@
 
-import { GBIF_BASE_URL, CATEGORY_KEYS } from '../constants.ts';
-import { Category, SpeciesRecord } from '../types.ts';
-import { SPECIES_KNOWLEDGE } from './knowledgeService.ts';
-import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService.ts';
+import { GBIF_BASE_URL, CATEGORY_KEYS } from '../constants';
+import { Category, SpeciesRecord } from '../types';
+import { SPECIES_KNOWLEDGE } from './knowledgeService';
+import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService';
 
 export const fetchTopSpecies = async (
   category: Category,
@@ -48,7 +48,7 @@ export const fetchTopSpecies = async (
 
           let dutchName = wiki?.name;
           if (!dutchName) {
-            const local = SPECIES_KNOWLEDGE[cleanKey];
+            const local = SPECIES_KNOWLEDGE[cleanKey.toLowerCase()];
             if (local) dutchName = local.dutchName;
           }
 
