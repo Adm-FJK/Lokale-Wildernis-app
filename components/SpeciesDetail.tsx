@@ -65,6 +65,11 @@ const SpeciesDetail: React.FC<Props> = ({ species, onClose }) => {
   const iucnCode = iucnCodeMatch ? iucnCodeMatch[1] : null;
   const iucnDetail = iucnCode ? IUCN_INFO[iucnCode] : null;
 
+  // Samengestelde status tekst bouwen
+  const fullStatusText = iucnDetail 
+    ? `${iucnDetail.label} / ${iucnDetail.english}` 
+    : species.conservationStatus;
+
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 transition-opacity duration-300 ${species ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div className="absolute inset-0 bg-stone-900/95 backdrop-blur-md" onClick={onClose} />
@@ -103,7 +108,7 @@ const SpeciesDetail: React.FC<Props> = ({ species, onClose }) => {
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center gap-2 bg-red-50 text-red-700 px-4 py-2 rounded-lg border border-red-100 w-fit">
                       <ShieldAlert size={16} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{species.conservationStatus}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{fullStatusText}</span>
                     </div>
                     {iucnDetail && (
                       <p className="text-[11px] leading-snug text-stone-500 italic max-w-sm">

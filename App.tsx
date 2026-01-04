@@ -276,8 +276,15 @@ const App: React.FC = () => {
                   </div>
                 </div>
                 {isEndangeredCategory && (
-                  <button onClick={() => setShowIucnLegend(!showIucnLegend)} className="text-[10px] font-black text-stone-400 uppercase tracking-widest flex items-center gap-2 hover:text-stone-900 transition-colors group p-2">
-                    <Info size={14} /> Rode Lijstcategorieën {showIucnLegend ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  <button 
+                    onClick={() => setShowIucnLegend(!showIucnLegend)} 
+                    className="flex items-center gap-3 px-4 py-2 bg-stone-100 border border-stone-200 rounded-full text-stone-900 transition-all hover:bg-stone-200 hover:border-stone-300 group shadow-sm active:scale-95 shrink-0 w-fit"
+                  >
+                    <Info size={16} strokeWidth={2.5} className="text-stone-900 fill-stone-900/10" />
+                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">Rode Lijstcategorieën</span>
+                    <div className={`transition-transform duration-300 ${showIucnLegend ? 'rotate-180' : ''}`}>
+                      <ChevronDown size={16} strokeWidth={3} className="text-stone-900" />
+                    </div>
                   </button>
                 )}
               </div>
@@ -301,7 +308,6 @@ const App: React.FC = () => {
                 <div className="mb-12 bg-white border border-stone-200 rounded-2xl p-6 md:p-10 shadow-xl animate-fadeIn">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12">
                     {RED_LIST_LEGEND.map((item, idx) => {
-                      // Bepaal badge code gebaseerd op titel tekst
                       const isEB = item.title.includes('Ernstig');
                       const isBE = item.title.includes('Bedreigd');
                       const isKW = item.title.includes('Kwetsbaar');
