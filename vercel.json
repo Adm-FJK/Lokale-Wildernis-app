@@ -11,6 +11,9 @@
     }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/((?!.*\\.(?:tsx|ts|js|css|json|png|jpg|svg)).*)",
+      "destination": "/index.html"
+    }
   ]
 }

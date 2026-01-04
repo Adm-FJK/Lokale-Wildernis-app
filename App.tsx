@@ -14,13 +14,13 @@ import {
   Info, 
   Snowflake 
 } from 'lucide-react';
-import { City, Category, SpeciesRecord } from './types';
-import { MONTHS } from './constants';
-import { fetchTopSpecies } from './services/gbifService';
-import { fetchEndangeredSpecies, IUCN_INFO } from './services/nbaService';
-import { searchDutchCities } from './services/locationService';
-import LoadingScreen from './components/LoadingScreen';
-import SpeciesDetail from './components/SpeciesDetail';
+import { City, Category, SpeciesRecord } from './types.ts';
+import { MONTHS } from './constants.ts';
+import { fetchTopSpecies } from './services/gbifService.ts';
+import { fetchEndangeredSpecies, IUCN_INFO } from './services/nbaService.ts';
+import { searchDutchCities } from './services/locationService.ts';
+import LoadingScreen from './components/LoadingScreen.tsx';
+import SpeciesDetail from './components/SpeciesDetail.tsx';
 
 const ButterflyIcon = ({ size = 24, className = "" }: { size?: number; className?: string }) => (
   <svg 

@@ -1,10 +1,10 @@
 
 import React, { useEffect, useState } from 'react';
 import { X, ExternalLink, BookOpen, ShieldAlert, Info, Landmark } from 'lucide-react';
-import { SpeciesRecord, SpeciesDetail as SpeciesDetailType, Category } from '../types';
-import { getSpeciesInfo } from '../services/knowledgeService';
-import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from '../services/wikiService';
-import { IUCN_INFO } from '../services/nbaService';
+import { SpeciesRecord, SpeciesDetail as SpeciesDetailType, Category } from '../types.ts';
+import { getSpeciesInfo } from '../services/knowledgeService.ts';
+import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from '../services/wikiService.ts';
+import { IUCN_INFO } from '../services/nbaService.ts';
 
 interface Props {
   species: (SpeciesRecord & { dutchName?: string }) | null;

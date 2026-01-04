@@ -1,7 +1,7 @@
 
-import { GBIF_BASE_URL } from '../constants';
-import { SpeciesRecord } from '../types';
-import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService';
+import { GBIF_BASE_URL } from '../constants.ts';
+import { SpeciesRecord } from '../types.ts';
+import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService.ts';
 
 /**
  * DE BELANGRIJKSTE VARIABELE VOOR DE DATA:
