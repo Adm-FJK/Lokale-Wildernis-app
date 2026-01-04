@@ -1,3 +1,4 @@
+
 import { GBIF_BASE_URL } from '../constants';
 import { SpeciesRecord } from '../types';
 import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService';
@@ -58,33 +59,42 @@ const mapNLStatus = (rawStatus: string): string => {
   return rawStatus;
 };
 
+// De centrale cache voor de Rode Lijst data
 let cachedRedListMap: Map<string, { status: string, link?: string }> | null = null;
 
+/**
+ * Haalt de volledige Nederlandse Rode Lijst op via de jsDelivr CDN.
+ * Dit gebeurt slechts één keer per sessie.
+ */
 const getRedListNLMap = async (): Promise<Map<string, { status: string, link?: string }>> => {
   if (cachedRedListMap) return cachedRedListMap;
+  
   try {
-    const files = ['./data/redlist_nl_1.json', './data/redlist_nl_2.json', './data/redlist_nl_3.json', './data/redlist_nl_4.json'];
-    const responses = await Promise.all(files.map(f => fetch(f)));
-    let fullData: any[] = [];
-    for (const res of responses) {
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data)) fullData = fullData.concat(data);
-      }
-    }
+    // Jouw nieuwe professionele CDN link
+    const CDN_URL = 'https://cdn.jsdelivr.net/gh/Adm-FJK/Lokale-Wildernis-app@main/data/redlist_full.json';
+    
+    const response = await fetch(CDN_URL);
+    if (!response.ok) throw new Error('CDN fetch failed');
+    
+    const fullData = await response.json();
     const map = new Map<string, { status: string, link?: string }>();
-    fullData.forEach(entry => {
-      const name = normalizeScientificName(entry["wetenschappelijke naam"] || "");
-      if (name) {
-        map.set(name.toLowerCase(), {
-          status: mapNLStatus(entry["status NL"] || "Onbekend"),
-          link: entry["link"]
-        });
-      }
-    });
+    
+    if (Array.isArray(fullData)) {
+      fullData.forEach(entry => {
+        const name = normalizeScientificName(entry["wetenschappelijke naam"] || "");
+        if (name) {
+          map.set(name.toLowerCase(), {
+            status: mapNLStatus(entry["status NL"] || "Onbekend"),
+            link: entry["link"]
+          });
+        }
+      });
+    }
+    
     cachedRedListMap = map;
     return cachedRedListMap;
   } catch (e) {
+    console.error('Fout bij laden Rode Lijst via CDN:', e);
     return new Map();
   }
 };
@@ -117,8 +127,10 @@ export const fetchEndangeredSpecies = async (
 
   let url: string;
   if (isDutchSpecific) {
-    url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&facet=speciesKey&facetLimit=10000&limit=0`;
+    // Voor NL Rode Lijst scannen we een groter aantal soorten (10000) om matches te vinden in onze lokale lijst
+    url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&facet=speciesKey&facetLimit=5000&limit=0`;
   } else {
+    // Voor internationale IUCN gebruiken we de ingebouwde GBIF filters
     url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&iucn_red_list_category=CR&iucn_red_list_category=EN&iucn_red_list_category=VU&iucn_red_list_category=NT&facet=speciesKey&facetLimit=50&limit=0`;
   }
 
@@ -127,8 +139,9 @@ export const fetchEndangeredSpecies = async (
     const response = await fetch(url);
     const data = await response.json();
     const facets = data.facets?.find((f: any) => f.field === 'SPECIES_KEY')?.counts || [];
+    
     const finalResults: SpeciesRecord[] = [];
-    const maxMatches = 50;
+    const maxMatches = 15; // We tonen de top 15 matches
     const batchSize = 100;
 
     for (let i = 0; i < facets.length && finalResults.length < maxMatches; i += batchSize) {
@@ -137,12 +150,21 @@ export const fetchEndangeredSpecies = async (
         batch.map(async (facet: any) => {
           try {
             const sRes = await fetch(`${GBIF_BASE_URL}/species/${facet.name}`);
+            if (!sRes.ok) return null;
             const sData = await sRes.json();
-            const normalized = normalizeScientificName(sData.canonicalName || sData.scientificName);
+            
+            const rawName = sData.canonicalName || sData.scientificName;
+            const normalized = normalizeScientificName(rawName);
+            
             if (isDutchSpecific) {
               const nlData = redListMap.get(normalized.toLowerCase());
               if (!nlData) return null;
-              const [img, wiki] = await Promise.all([fetchWikiImage(normalized), fetchWikiDutchData(normalized)]);
+              
+              const [img, wiki] = await Promise.all([
+                fetchWikiImage(normalized), 
+                fetchWikiDutchData(normalized)
+              ]);
+
               return {
                 key: sData.key,
                 scientificName: normalized,
@@ -155,7 +177,12 @@ export const fetchEndangeredSpecies = async (
             } else {
               const iucnCode = await resolveIucnStatus(facet.name, sData);
               if (['LC', 'DD', 'NE'].includes(iucnCode)) return null;
-              const [img, wiki] = await Promise.all([fetchWikiImage(normalized), fetchWikiDutchData(normalized)]);
+              
+              const [img, wiki] = await Promise.all([
+                fetchWikiImage(normalized), 
+                fetchWikiDutchData(normalized)
+              ]);
+
               return {
                 key: sData.key,
                 scientificName: normalized,
@@ -172,5 +199,8 @@ export const fetchEndangeredSpecies = async (
       finalResults.push(...validMatches);
     }
     return finalResults.slice(0, maxMatches);
-  } catch (error) { return []; }
+  } catch (error) { 
+    console.error('Fetch endangered species error:', error);
+    return []; 
+  }
 };
