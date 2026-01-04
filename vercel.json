@@ -1,0 +1,19 @@
+
+{
+  "cleanUrls": true,
+  "headers": [
+    {
+      "source": "/(.*).(ts|tsx)",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/javascript"
+        },
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        }
+      ]
+    }
+  ]
+}
