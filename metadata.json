@@ -1,0 +1,7 @@
+{
+  "name": "Lokale Wildernis",
+  "description": "Discover the urban wildlife in Dutch cities. Learn to recognize the top birds, insects, and plants based on recent GBIF observations.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
