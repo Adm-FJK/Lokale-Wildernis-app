@@ -2,49 +2,46 @@ import { GBIF_BASE_URL } from '../constants';
 import { SpeciesRecord } from '../types';
 import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService';
 
-export const IUCN_INFO: Record<string, { label: string, english: string, description: string }> = {
-  // Internationale codes
-  'CR': { 
-    label: 'Ernstig bedreigd (EB)', 
-    english: 'Critically Endangered (CR)', 
-    description: 'Soorten die zeer sterk zijn afgenomen en zeer zeldzaam zijn. De soort loopt een extreem hoog risico om in het wild uit te sterven.' 
+export const RED_LIST_LEGEND = [
+  {
+    title: "Ernstig bedreigd (EB), Critically Endangered (CR)",
+    bullets: [
+      "soorten die zeer sterk zijn afgenomen en zeer zeldzaam zijn.",
+      "De soort loopt een extreem hoog risico om in het wild uit te sterven."
+    ]
   },
-  'EN': { 
-    label: 'Bedreigd (BE)', 
-    english: 'Endangered (EN)', 
-    description: 'Soorten die sterk zijn afgenomen en zeldzaam tot zeer zeldzaam zijn en soorten die zeer sterk zijn afgenomen en zeldzaam zijn. De soort loopt een zeer hoog risico om in het wild uit te sterven.' 
+  {
+    title: "Bedreigd (BE), Endangered (EN)",
+    bullets: [
+      "Soorten die sterk zijn afgenomen en zeldzaam tot zeer zeldzaam zijn en soorten die zeer sterk zijn afgenomen en zeldzaam zijn.",
+      "De soort loopt een zeer hoog risico om in het wild uit te sterven."
+    ]
   },
-  'VU': { 
-    label: 'Kwetsbaar (KW)', 
-    english: 'Vulnerable (VU)', 
-    description: 'Soorten die zijn afgenomen en vrij tot zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen en vrij zeldzaam zijn. De soort loopt een hoog risico om in het wild uit te sterven.' 
+  {
+    title: "Kwetsbaar (KW), Vulnerable (VU)",
+    bullets: [
+      "soorten die zijn afgenomen en vrij tot zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen en vrij zeldzaam zijn.",
+      "De soort loopt een hoog risico om in het wild uit te sterven."
+    ]
   },
-  'NT': { 
-    label: 'Gevoelig (GE)', 
-    english: 'Near Threatened (NT)', 
-    description: 'Soorten die stabiel zijn of toegenomen, maar zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen, maar nog algemeen zijn. De soort is nog niet bedreigd, maar nadert de status kwetsbaar.' 
-  },
-  // Nederlandse codes (voor matching in SpeciesDetail)
-  'EB': { 
-    label: 'Ernstig bedreigd (EB)', 
-    english: 'Critically Endangered (CR)', 
-    description: 'Soorten die zeer sterk zijn afgenomen en zeer zeldzaam zijn. De soort loopt een extreem hoog risico om in het wild uit te sterven.' 
-  },
-  'BE': { 
-    label: 'Bedreigd (BE)', 
-    english: 'Endangered (EN)', 
-    description: 'Soorten die sterk zijn afgenomen en zeldzaam tot zeer zeldzaam zijn en soorten die zeer sterk zijn afgenomen en zeldzaam zijn. De soort loopt een zeer hoog risico om in het wild uit te sterven.' 
-  },
-  'KW': { 
-    label: 'Kwetsbaar (KW)', 
-    english: 'Vulnerable (VU)', 
-    description: 'Soorten die zijn afgenomen en vrij tot zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen en vrij zeldzaam zijn. De soort loopt een hoog risico om in het wild uit te sterven.' 
-  },
-  'GE': { 
-    label: 'Gevoelig (GE)', 
-    english: 'Near Threatened (NT)', 
-    description: 'Soorten die stabiel zijn of toegenomen, maar zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen, maar nog algemeen zijn. De soort is nog niet bedreigd, maar nadert de status kwetsbaar.' 
+  {
+    title: "Gevoelig (GE) = Near Threatened (NT)",
+    bullets: [
+      "soorten die stabiel zijn of toegenomen, maar zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen, maar nog algemeen zijn",
+      "De soort is nog niet bedreigd, maar nadert de status kwetsbaar."
+    ]
   }
+];
+
+export const IUCN_INFO: Record<string, { label: string, english: string, description: string }> = {
+  'CR': { label: 'Ernstig bedreigd (EB)', english: 'Critically Endangered (CR)', description: 'soorten die zeer sterk zijn afgenomen en zeer zeldzaam zijn. De soort loopt een extreem hoog risico om in het wild uit te sterven.' },
+  'EN': { label: 'Bedreigd (BE)', english: 'Endangered (EN)', description: 'Soorten die sterk zijn afgenomen en zeldzaam tot zeer zeldzaam zijn en soorten die zeer sterk zijn afgenomen en zeldzaam zijn. De soort loopt een zeer hoog risico om in het wild uit te sterven.' },
+  'VU': { label: 'Kwetsbaar (KW)', english: 'Vulnerable (VU)', description: 'soorten die zijn afgenomen en vrij tot zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen en vrij zeldzaam zijn. De soort loopt een hoog risico om in het wild uit te sterven.' },
+  'NT': { label: 'Gevoelig (GE)', english: 'Near Threatened (NT)', description: 'soorten die stabiel zijn of toegenomen, maar zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen, maar nog algemeen zijn. De soort is nog niet bedreigd, maar nadert de status kwetsbaar.' },
+  'EB': { label: 'Ernstig bedreigd (EB)', english: 'Critically Endangered (CR)', description: 'soorten die zeer sterk zijn afgenomen en zeer zeldzaam zijn. De soort loopt een extreem hoog risico om in het wild uit te sterven.' },
+  'BE': { label: 'Bedreigd (BE)', english: 'Endangered (EN)', description: 'Soorten die sterk zijn afgenomen en zeldzaam tot zeer zeldzaam zijn en soorten die zeer sterk zijn afgenomen en zeldzaam zijn. De soort loopt een zeer hoog risico om in het wild uit te sterven.' },
+  'KW': { label: 'Kwetsbaar (KW)', english: 'Vulnerable (VU)', description: 'soorten die zijn afgenomen en vrij tot zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen en vrij zeldzaam zijn. De soort loopt een hoog risico om in het wild uit te sterven.' },
+  'GE': { label: 'Gevoelig (GE)', english: 'Near Threatened (NT)', description: 'soorten die stabiel zijn of toegenomen, maar zeer zeldzaam zijn en soorten die sterk tot zeer sterk zijn afgenomen, maar nog algemeen zijn. De soort is nog niet bedreigd, maar nadert de status kwetsbaar.' }
 };
 
 const mapIucnStatus = (code: string | null | undefined): string => {
@@ -61,30 +58,20 @@ const mapNLStatus = (rawStatus: string): string => {
   return rawStatus;
 };
 
-// Cache voor de lokale Rode Lijst
 let cachedRedListMap: Map<string, { status: string, link?: string }> | null = null;
 
 const getRedListNLMap = async (): Promise<Map<string, { status: string, link?: string }>> => {
   if (cachedRedListMap) return cachedRedListMap;
-  
   try {
-    const files = [
-      './data/redlist_nl_1.json',
-      './data/redlist_nl_2.json',
-      './data/redlist_nl_3.json',
-      './data/redlist_nl_4.json'
-    ];
-
+    const files = ['./data/redlist_nl_1.json', './data/redlist_nl_2.json', './data/redlist_nl_3.json', './data/redlist_nl_4.json'];
     const responses = await Promise.all(files.map(f => fetch(f)));
     let fullData: any[] = [];
-    
     for (const res of responses) {
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) fullData = fullData.concat(data);
       }
     }
-    
     const map = new Map<string, { status: string, link?: string }>();
     fullData.forEach(entry => {
       const name = normalizeScientificName(entry["wetenschappelijke naam"] || "");
@@ -95,11 +82,9 @@ const getRedListNLMap = async (): Promise<Map<string, { status: string, link?: s
         });
       }
     });
-    
     cachedRedListMap = map;
     return cachedRedListMap;
   } catch (e) {
-    console.warn("Kon Rode Lijst data niet laden", e);
     return new Map();
   }
 };
@@ -142,30 +127,22 @@ export const fetchEndangeredSpecies = async (
     const response = await fetch(url);
     const data = await response.json();
     const facets = data.facets?.find((f: any) => f.field === 'SPECIES_KEY')?.counts || [];
-    
     const finalResults: SpeciesRecord[] = [];
     const maxMatches = 50;
     const batchSize = 100;
 
     for (let i = 0; i < facets.length && finalResults.length < maxMatches; i += batchSize) {
       const batch = facets.slice(i, i + batchSize);
-      
       const batchResults = await Promise.all(
         batch.map(async (facet: any) => {
           try {
             const sRes = await fetch(`${GBIF_BASE_URL}/species/${facet.name}`);
             const sData = await sRes.json();
             const normalized = normalizeScientificName(sData.canonicalName || sData.scientificName);
-            
             if (isDutchSpecific) {
               const nlData = redListMap.get(normalized.toLowerCase());
               if (!nlData) return null;
-              
-              const [img, wiki] = await Promise.all([
-                fetchWikiImage(normalized),
-                fetchWikiDutchData(normalized)
-              ]);
-
+              const [img, wiki] = await Promise.all([fetchWikiImage(normalized), fetchWikiDutchData(normalized)]);
               return {
                 key: sData.key,
                 scientificName: normalized,
@@ -178,12 +155,7 @@ export const fetchEndangeredSpecies = async (
             } else {
               const iucnCode = await resolveIucnStatus(facet.name, sData);
               if (['LC', 'DD', 'NE'].includes(iucnCode)) return null;
-
-              const [img, wiki] = await Promise.all([
-                fetchWikiImage(normalized),
-                fetchWikiDutchData(normalized)
-              ]);
-
+              const [img, wiki] = await Promise.all([fetchWikiImage(normalized), fetchWikiDutchData(normalized)]);
               return {
                 key: sData.key,
                 scientificName: normalized,
@@ -193,19 +165,12 @@ export const fetchEndangeredSpecies = async (
                 conservationStatus: mapIucnStatus(iucnCode),
               };
             }
-          } catch (e) {
-            return null;
-          }
+          } catch (e) { return null; }
         })
       );
-
       const validMatches = batchResults.filter((r): r is SpeciesRecord => r !== null);
       finalResults.push(...validMatches);
     }
-
     return finalResults.slice(0, maxMatches);
-  } catch (error) {
-    console.error("Fout tijdens fetch:", error);
-    return [];
-  }
+  } catch (error) { return []; }
 };
