@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { X, ExternalLink, BookOpen, ShieldAlert, Landmark } from 'lucide-react';
 import { SpeciesRecord, SpeciesDetail as SpeciesDetailType, Category } from '../types';
 import { getSpeciesInfo } from '../services/knowledgeService';
@@ -71,14 +71,14 @@ const SpeciesDetail: React.FC<Props> = ({ species, onClose, activeCategory }) =>
     : `${iucnDetail.label} / ${iucnDetail.english}`;
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 transition-opacity duration-300 ${species ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+    <div className={`fixed inset-0 z-[100] flex items-center justify-center p-0 sm:p-6 transition-opacity duration-300 ${species ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
       <div className="absolute inset-0 bg-stone-900/95 backdrop-blur-md" onClick={onClose} />
       
       <div className={`relative bg-white w-full max-w-5xl transition-all duration-500 ease-out transform ${species ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-12 opacity-0'} h-full sm:h-auto sm:max-h-[92vh] overflow-hidden shadow-2xl sm:rounded-3xl flex flex-col`}>
         
         <button 
           onClick={onClose} 
-          className="absolute top-4 right-4 p-3 bg-stone-900/80 backdrop-blur-sm text-white hover:bg-emerald-700 transition-all z-[60] rounded-full shadow-2xl active:scale-90"
+          className="absolute top-4 right-4 p-3 bg-stone-900/80 backdrop-blur-sm text-white hover:bg-emerald-700 transition-all z-[110] rounded-full shadow-2xl active:scale-90"
         >
           <X size={20} strokeWidth={2.5} />
         </button>

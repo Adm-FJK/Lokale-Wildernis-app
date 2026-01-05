@@ -121,9 +121,13 @@ const App: React.FC = () => {
     if (!selectedCity || !selectedMonth || !activeCategory) return;
     loadData();
     setShowIucnLegend(false);
+    
+    // Auto-scroll logic refined for sticky header
     const scrollTimer = setTimeout(() => {
-      if (mainRef.current) mainRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 150);
+      if (mainRef.current) {
+        mainRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 200);
     return () => clearTimeout(scrollTimer);
   }, [selectedCity, selectedMonth, activeCategory]);
 
@@ -168,7 +172,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFDFB] pb-40 overflow-x-hidden w-full">
+    <div className="min-h-screen bg-[#FDFDFB] pb-40 w-full relative">
       <section className="bg-[#111111] text-white px-6 py-16 md:py-24 border-b-[8px] border-emerald-900">
         <div className="max-w-screen-xl mx-auto">
           <div className="flex items-center gap-4 mb-6">
@@ -267,11 +271,12 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <div className="sticky top-0 z-40 bg-stone-100 border-b border-stone-200 shadow-sm md:shadow-none">
-        <div className="max-w-screen-xl mx-auto px-4 md:py-6">
+      {/* Sticky Filter Header - Fixed sticky bug and simplified mobile border logic */}
+      <div className="sticky top-0 z-[60] bg-white border-b border-stone-200 shadow-sm md:shadow-md">
+        <div className="max-w-screen-xl mx-auto px-0 md:px-4 md:py-6">
           <div className="flex flex-col md:flex-row md:gap-4">
-            <div className="flex border-b md:border-0 border-stone-200 h-16 md:h-20 md:flex-1 md:gap-4 -mx-4 md:mx-0">
-              <div ref={searchRef} className="flex-1 relative border-r md:border border-stone-200 md:bg-white md:rounded-sm md:shadow-sm transition-all hover:shadow-md group min-w-0">
+            <div className="flex md:flex-1 md:gap-4">
+              <div ref={searchRef} className="flex-1 relative border-r md:border border-stone-200 bg-white md:rounded-sm md:shadow-sm transition-all hover:shadow-md group h-16 md:h-20 min-w-0">
                 {isSearching ? (
                   <div className="absolute inset-0 bg-white md:rounded-sm z-50 flex items-center px-4 md:px-6">
                     <Search size={16} className="text-emerald-600 mr-3 shrink-0" />
@@ -302,7 +307,7 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              <div ref={monthRef} className="relative flex-1 md:bg-white md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md h-full min-w-0">
+              <div ref={monthRef} className="relative flex-1 bg-white md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md h-16 md:h-20 min-w-0">
                 <button onClick={() => { setIsMonthMenuOpen(!isMonthMenuOpen); setIsSearching(false); setIsCategoryMenuOpen(false); }} className="w-full h-full flex items-center justify-between px-4 md:px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left min-w-0">
                   <div className="min-w-0 truncate">
                     <span className="block text-[7px] md:text-[10px] font-black text-stone-600 md:text-stone-800 uppercase tracking-widest mb-0 truncate">Maand</span>
@@ -322,7 +327,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <div ref={categoryRef} className="relative bg-stone-50 md:bg-white md:flex-1 md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md border-b md:border-b border-stone-200 h-14 md:h-20 -mx-4 md:mx-0">
+            <div ref={categoryRef} className="relative bg-white md:flex-1 md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md h-14 md:h-20 w-full">
               <button onClick={() => { setIsCategoryMenuOpen(!isCategoryMenuOpen); setIsSearching(false); setIsMonthMenuOpen(false); }} className="w-full h-full flex items-center justify-between px-4 md:px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left min-w-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="text-emerald-600 shrink-0"><CategoryIcon cat={activeCategory} size={16} /></div>
@@ -334,7 +339,7 @@ const App: React.FC = () => {
                 <ChevronDown className={`text-stone-400 transition-transform duration-300 shrink-0 ${isCategoryMenuOpen ? 'rotate-180' : ''}`} size={16} />
               </button>
               {isCategoryMenuOpen && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-50 mt-2 animate-fadeIn overflow-hidden">
+                <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-[60] mt-2 animate-fadeIn overflow-hidden">
                   {(Object.values(Category) as Category[]).map((cat) => (
                     <button key={cat} onClick={() => { setActiveCategory(cat); setIsCategoryMenuOpen(false); }} className={`w-full flex items-center gap-4 p-5 transition-colors border-b border-stone-50 last:border-0 ${activeCategory === cat ? 'bg-emerald-50 text-emerald-900' : 'hover:bg-stone-50 text-stone-600'}`}>
                       <div className={activeCategory === cat ? 'text-emerald-600' : 'text-stone-400'}><CategoryIcon cat={cat} size={16} /></div>
@@ -348,7 +353,7 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <main ref={mainRef} className="bg-white scroll-mt-32 md:scroll-mt-40">
+      <main ref={mainRef} className="bg-white scroll-mt-40 md:scroll-mt-64">
         <div className="max-w-screen-xl mx-auto p-4 md:p-12">
           {!selectedCity ? (
             <div className="py-24 md:py-32 flex flex-col items-center text-center animate-fadeIn">
@@ -426,21 +431,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {activeCategory === Category.ENDANGERED && !loading && speciesList.length > 0 && !showIucnLegend && (
-                <div className="mb-12 animate-fadeIn"><p className="text-lg md:text-2xl text-stone-800 leading-relaxed font-serif italic border-l-4 border-red-500 pl-4 md:pl-6 py-2">Overzicht van soorten die op deze locatie zijn waargenomen met een internationaal bedreigde status volgens de IUCN</p></div>
-              )}
-              {activeCategory === Category.ENDANGERED_NL && !loading && speciesList.length > 0 && !showIucnLegend && (
-                <div className="mb-12 animate-fadeIn"><p className="text-lg md:text-2xl text-stone-800 leading-relaxed font-serif italic border-l-4 border-red-500 pl-4 md:pl-6 py-2">Overzicht van soorten die op deze locatie zijn waargenomen en op de Nederlandse Rode Lijst staan</p></div>
-              )}
-              {isInsectCategory && isWinterMonth && (
-                <div className="mb-12 bg-stone-50 border-l-4 border-stone-300 p-6 md:p-8 flex items-start gap-4 md:gap-6 animate-fadeIn">
-                  <Snowflake size={24} className="text-stone-400 shrink-0 mt-1" />
-                  <div>
-                    <h4 className="text-[9px] font-black uppercase tracking-widest text-stone-400 mb-2">Winternotitie</h4>
-                    <p className="text-base font-serif italic text-stone-600 leading-relaxed">In de winter zijn de meeste insecten in rust. Je vindt ze dan niet in de lucht, maar verscholen als eitje, larve of pop. De waarnemingen in deze lijst kunnen daarom ook betrekking hebben op deze (onvolwassen) rustende stadia.</p>
-                  </div>
-                </div>
-              )}
+              {/* RESTORED: Legend block for endangered species */}
               {isEndangeredCategory && showIucnLegend && (
                 <div className="mb-12 bg-white border border-stone-200 rounded-2xl p-6 md:p-10 shadow-xl animate-fadeIn">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 text-left">
@@ -474,6 +465,17 @@ const App: React.FC = () => {
                 </div>
               )}
 
+              {/* RESTORED: Winter month warning for insects */}
+              {isInsectCategory && isWinterMonth && (
+                <div className="mb-12 bg-stone-50 border-l-4 border-stone-300 p-6 md:p-8 flex items-start gap-4 md:gap-6 animate-fadeIn">
+                  <Snowflake size={24} className="text-stone-400 shrink-0 mt-1" />
+                  <div>
+                    <h4 className="text-[9px] font-black uppercase tracking-widest text-stone-400 mb-2">Winternotitie</h4>
+                    <p className="text-base font-serif italic text-stone-600 leading-relaxed">In de winter zijn de meeste insecten in rust. Je vindt ze dan niet in de lucht, maar verscholen als eitje, larve of pop. De waarnemingen in deze lijst kunnen daarom ook betrekking hebben op deze (onvolwassen) rustende stadia. Sommige soorten overwinteren als volwassen insect. </p>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-4 md:gap-x-8 gap-y-12 md:gap-y-16 animate-fadeIn">
                 {speciesList.map((species, index) => (
                   <div key={species.key} onClick={() => setSelectedSpecies(species)} className="group cursor-pointer flex flex-col min-w-0">
@@ -488,11 +490,6 @@ const App: React.FC = () => {
                     )}
                   </div>
                 ))}
-                {speciesList.length === 0 && (
-                  <div className="col-span-full py-24 md:py-40 text-center border-2 border-dashed border-stone-200 rounded-2xl">
-                    <div className="flex flex-col items-center px-6"><Info size={40} className="mb-4 text-stone-200" /><p className="text-stone-400 font-serif italic text-xl mb-2">Geen resultaten gevonden</p><p className="text-stone-300 text-[8px] uppercase tracking-widest font-black">Probeer een andere stad of periode</p></div>
-                  </div>
-                )}
               </div>
             </>
           )}
