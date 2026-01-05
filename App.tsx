@@ -204,57 +204,57 @@ const App: React.FC = () => {
               <X size={28} strokeWidth={2.5} />
             </button>
 
-            <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16">
+            <div className="flex-1 overflow-y-auto p-6 sm:p-10 md:p-12 lg:p-16">
               <div className="mb-12">
                 <div className="h-1.5 w-12 bg-emerald-600 mb-6 rounded-full"></div>
-                <h2 className="text-4xl font-serif font-bold text-stone-900 tracking-tighter uppercase">Over deze tool</h2>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-stone-900 tracking-tighter uppercase">Over deze tool</h2>
               </div>
               <div className="space-y-12">
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat doet deze tool?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     Deze tool visualiseert actuele biodiversiteitsdata voor elke locatie in Nederland. Het bundelt waarnemingen uit databases om een overzicht te geven van de meest voorkomende soorten van dit moment. Daarnaast koppelt het recente waarnemingsdata aan de officiële Rode Lijsten, om te zien welke soorten een bedreigde status hebben op nationaal of internationaal niveau.
                   </p>
                 </div>
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waar komt de data vandaan?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     De data is afkomstig uit <a href="https://www.gbif.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-700">GBIF</a>, een internationale digitale database die natuurgegevens van over de hele wereld koppelt. Voor Nederland bevat dit gegevens van onder andere waarneming.nl, onderzoeksinstituten, universities en natuurbeschermingsorganisaties.
                   </p>
                 </div>
                 <div ref={top15QuestionRef} className="animate-fadeIn scroll-mt-8">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Hoe wordt de top 15-soortenlijst samengesteld?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     De top 15 wordt berekend op basis van natuurdata van de afgelopen drie year (2023-2025). Per locatie wordt er in een gebied van circa 18x11 kilometer gekeken hoeveel unieke waarnemingen er voor elke soort zijn gedaan in de geselecteerde maand. De soorten die het vaakst zijn doorgegeven aan platforms zoals <a href="http://waarneming.nl/" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-700">Waarneming.nl</a> en vervolgens in de internationale GBIF-database zijn beland, vormen de top 15.
                   </p>
                 </div>
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom zie ik minder dan 15 soorten in de lijst staan?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     Dat kan gebeuren als er in de door jou gekozen maand en regio niet genoeg verschillende soorten zijn doorgegeven aan de database. De app toont alleen soorten die in de afgelopen drie jaar (2023-2025) daadwerkelijk zijn waargenomen. Vooral in de koude wintermaanden worden er minder insecten geregistreerd, waardoor de lijst korter kan zijn dan de maximaal 15 soorten. Daarnaast worden er in sommige gebieden soms minder soorten waargenomen en doorgegeven.
                   </p>
                 </div>
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom staat een zeldzame soort hoog in de lijst?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     De top 15 wordt bepaald door het <em>aantal</em> waarnemingen in de database. Soms kan een zeldzame soort hoog eindigen. Dit kan bijvoorbeeld voorkomen wanneer een groep biologen onderzoek doet naar één specifieke zeldzame soort in de regio. Er komen dan in één keer heel veel meldingen in de database.
                   </p>
                 </div>
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat is het waarnemingseffect?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     Het waarnemingseffect betekent dat de lijst niet alleen laat zien wat er in de natuur leeft, maar ook waar mensen graag naar kijken. Soorten die opvallen (zoals een felgekleurde vlinder) of op makkelijk bereikbare plekken zitten (zoals in een stadspark), worden vaker doorgegeven dan onopvallende soorten in afgelegen gebieden. Hierdoor staan 'populaire' soorten vaak hoger in de lijst dan soorten die wel veel voorkomen, maar minder vaak worden gemeld.
                   </p>
                 </div>
                 <div ref={redListQuestionRef} className="animate-fadeIn scroll-mt-8">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat is het verschil tussen de Nederlandse rode lijst en die van de IUCN?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     De IUCN-status kijkt naar hoe het wereldwijd met een soort gaat. Een soort kan wereldwijd heel algemeen zijn (status: <em>Niet bedreigd</em>), maar in Nederland ontzettend zeldzaam of zelfs bijna verdwenen. De Nederlandse Rode Lijst is specifiek door de overheid opgesteld voor onze eigen natuur en bevat soorten die specifiek in Nederland zeldzaam zijn en/of sterk in aantal afnemen.
                   </p>
                 </div>
                 <div className="animate-fadeIn">
                   <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom zie ik soms een verouderde IUCN-status?</h3>
-                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-base md:text-lg border-l-4 border-stone-100 pl-6">
                     Natuurdata is altijd in beweging. Er kan een vertraging optreden bij de synchronisatie tussen de bronorganisaties (IUCN) en de centrale databases van GBIF. De meest actuele status is ook te vinden op de officiële website van de IUCN of het Nederlands Soortenregister.
                   </p>
                 </div>
@@ -275,15 +275,15 @@ const App: React.FC = () => {
                 {isSearching ? (
                   <div className="absolute inset-0 bg-white md:rounded-sm z-50 flex items-center px-4 md:px-6">
                     <Search size={16} className="text-emerald-600 mr-3 shrink-0" />
-                    <input type="text" placeholder="Kies een locatie" autoFocus className="w-full bg-transparent outline-none font-bold uppercase tracking-wider text-[10px] text-stone-900 placeholder:text-stone-400" value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)} />
+                    <input type="text" placeholder="Kies een locatie" autoFocus className="w-full bg-transparent outline-none font-bold uppercase tracking-wider text-[10px] md:text-sm text-stone-900 placeholder:text-stone-400 md:placeholder:text-stone-500" value={searchQuery} onChange={(e) => handleSearchChange(e.target.value)} />
                     <button onClick={() => setIsSearching(false)} className="p-2 text-stone-400 hover:text-stone-900"><X size={16} /></button>
                   </div>
                 ) : (
                   <button onClick={() => { setIsSearching(true); setIsMonthMenuOpen(false); setIsCategoryMenuOpen(false); }} className="w-full h-full flex items-center gap-3 px-4 md:px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left min-w-0">
                     <MapPin size={16} className="text-emerald-600 flex-shrink-0" />
                     <div className="min-w-0 truncate">
-                      <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0 truncate">Locatie</span>
-                      <span className={`block text-[10px] font-bold uppercase tracking-wider truncate ${!selectedCity ? 'text-stone-400' : 'text-stone-900'}`}>{selectedCity ? selectedCity.name : 'Kies een locatie'}</span>
+                      <span className="block text-[7px] md:text-[10px] font-black text-stone-600 md:text-stone-800 uppercase tracking-widest mb-0 truncate">Locatie</span>
+                      <span className={`block text-[10px] md:text-sm font-bold uppercase tracking-wider truncate ${!selectedCity ? 'text-stone-400 md:text-stone-500' : 'text-stone-900'}`}>{selectedCity ? selectedCity.name : 'Kies een locatie'}</span>
                     </div>
                   </button>
                 )}
@@ -294,8 +294,8 @@ const App: React.FC = () => {
                     </button>
                     {searchResults.map(city => (
                       <div key={`${city.lat}-${city.lng}-${city.name}`} onClick={() => { setSelectedCity(city); setIsSearching(false); setSearchQuery(''); setSearchResults([]); }} className="p-4 hover:bg-stone-900 hover:text-white cursor-pointer transition-colors border-b border-stone-50 flex flex-col">
-                        <span className="font-bold uppercase tracking-wider text-[11px]">{city.name}</span>
-                        {city.fullName && city.fullName !== city.name && <span className="text-[9px] opacity-60 italic truncate">{city.fullName}</span>}
+                        <span className="font-bold uppercase tracking-wider text-[11px] md:text-sm">{city.name}</span>
+                        {city.fullName && city.fullName !== city.name && <span className="text-[9px] md:text-[11px] opacity-60 italic truncate">{city.fullName}</span>}
                       </div>
                     ))}
                   </div>
@@ -305,8 +305,8 @@ const App: React.FC = () => {
               <div ref={monthRef} className="relative flex-1 md:bg-white md:border md:border-stone-200 md:rounded-sm md:shadow-sm transition-all hover:shadow-md h-full min-w-0">
                 <button onClick={() => { setIsMonthMenuOpen(!isMonthMenuOpen); setIsSearching(false); setIsCategoryMenuOpen(false); }} className="w-full h-full flex items-center justify-between px-4 md:px-6 hover:bg-stone-50 md:hover:bg-white transition-colors text-left min-w-0">
                   <div className="min-w-0 truncate">
-                    <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0 truncate">Maand</span>
-                    <span className={`block text-[10px] font-bold uppercase tracking-wider truncate ${!selectedMonth ? 'text-stone-400' : 'text-stone-900'}`}>{selectedMonth ? MONTHS[selectedMonth - 1] : 'Selecteer maand'}</span>
+                    <span className="block text-[7px] md:text-[10px] font-black text-stone-600 md:text-stone-800 uppercase tracking-widest mb-0 truncate">Maand</span>
+                    <span className={`block text-[10px] md:text-sm font-bold uppercase tracking-wider truncate ${!selectedMonth ? 'text-stone-400 md:text-stone-500' : 'text-stone-900'}`}>{selectedMonth ? MONTHS[selectedMonth - 1] : 'Selecteer maand'}</span>
                   </div>
                   <ChevronDown className={`text-stone-400 transition-transform duration-300 shrink-0 ${isMonthMenuOpen ? 'rotate-180' : ''}`} size={14} />
                 </button>
@@ -314,7 +314,7 @@ const App: React.FC = () => {
                   <div className="absolute top-full left-0 right-0 bg-white border border-stone-200 md:rounded-sm shadow-2xl z-[60] mt-2 max-h-80 overflow-y-auto animate-fadeIn">
                     {MONTHS.map((m, i) => (
                       <button key={m} onClick={() => { setSelectedMonth(i + 1); setIsMonthMenuOpen(false); }} className={`w-full flex items-center gap-4 p-4 transition-colors border-b border-stone-50 last:border-0 ${selectedMonth === i + 1 ? 'bg-emerald-50 text-emerald-900 font-bold' : 'hover:bg-stone-50 text-stone-600'}`}>
-                        <span className="font-bold uppercase tracking-widest text-[10px]">{m}</span>
+                        <span className="font-bold uppercase tracking-widest text-[10px] md:text-xs">{m}</span>
                       </button>
                     ))}
                   </div>
@@ -327,8 +327,8 @@ const App: React.FC = () => {
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="text-emerald-600 shrink-0"><CategoryIcon cat={activeCategory} size={16} /></div>
                   <div className="min-w-0">
-                    <span className="block text-[7px] font-black text-stone-600 uppercase tracking-widest mb-0 truncate">Wat zoek je?</span>
-                    <span className={`block text-[10px] font-bold uppercase tracking-wider truncate ${!activeCategory ? 'text-stone-400' : 'text-stone-900'}`}>{activeCategory || 'Maak een keuze...'}</span>
+                    <span className="block text-[7px] md:text-[10px] font-black text-stone-600 md:text-stone-800 uppercase tracking-widest mb-0 truncate">Wat zoek je?</span>
+                    <span className={`block text-[10px] md:text-sm font-bold uppercase tracking-wider truncate ${!activeCategory ? 'text-stone-400 md:text-stone-500' : 'text-stone-900'}`}>{activeCategory || 'Maak een keuze...'}</span>
                   </div>
                 </div>
                 <ChevronDown className={`text-stone-400 transition-transform duration-300 shrink-0 ${isCategoryMenuOpen ? 'rotate-180' : ''}`} size={16} />
@@ -338,7 +338,7 @@ const App: React.FC = () => {
                   {(Object.values(Category) as Category[]).map((cat) => (
                     <button key={cat} onClick={() => { setActiveCategory(cat); setIsCategoryMenuOpen(false); }} className={`w-full flex items-center gap-4 p-5 transition-colors border-b border-stone-50 last:border-0 ${activeCategory === cat ? 'bg-emerald-50 text-emerald-900' : 'hover:bg-stone-50 text-stone-600'}`}>
                       <div className={activeCategory === cat ? 'text-emerald-600' : 'text-stone-400'}><CategoryIcon cat={cat} size={16} /></div>
-                      <span className="font-bold uppercase tracking-widest text-[10px]">{cat}</span>
+                      <span className="font-bold uppercase tracking-widest text-[10px] md:text-xs">{cat}</span>
                     </button>
                   ))}
                 </div>
