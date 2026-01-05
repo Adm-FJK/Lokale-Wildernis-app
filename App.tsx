@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import { 
   Search, 
   MapPin, 
@@ -11,7 +12,8 @@ import {
   ShieldAlert, 
   Calendar, 
   Info, 
-  Snowflake 
+  Snowflake,
+  HelpCircle
 } from 'lucide-react';
 import { City, Category, SpeciesRecord } from './types.ts';
 import { MONTHS } from './constants.ts';
@@ -66,6 +68,7 @@ const App: React.FC = () => {
   const [searchResults, setSearchResults] = useState<City[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showIucnLegend, setShowIucnLegend] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
   const [isMonthMenuOpen, setIsMonthMenuOpen] = useState(false);
   
@@ -73,7 +76,21 @@ const App: React.FC = () => {
   const categoryRef = useRef<HTMLDivElement>(null);
   const monthRef = useRef<HTMLDivElement>(null);
   const mainRef = useRef<HTMLDivElement>(null);
+  const top15QuestionRef = useRef<HTMLDivElement>(null);
+  const redListQuestionRef = useRef<HTMLDivElement>(null);
   const searchTimeout = useRef<number | null>(null);
+
+  // Scroll-lock effect for the info overlay
+  useEffect(() => {
+    if (showInfo) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showInfo]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -137,6 +154,22 @@ const App: React.FC = () => {
   const isWinterMonth = selectedMonth ? (selectedMonth >= 11 || selectedMonth <= 2) : false;
   const isInsectCategory = activeCategory === Category.BUTTERFLIES || activeCategory === Category.INSECTS;
   const isEndangeredCategory = activeCategory === Category.ENDANGERED || activeCategory === Category.ENDANGERED_NL;
+  const isTop15Category = activeCategory === Category.BIRDS || activeCategory === Category.BUTTERFLIES || activeCategory === Category.INSECTS;
+
+  const openTop15Info = () => {
+    setShowInfo(true);
+    // Give modal time to mount before scrolling
+    setTimeout(() => {
+      top15QuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const openRedListInfo = () => {
+    setShowInfo(true);
+    setTimeout(() => {
+      redListQuestionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFDFB] pb-40">
@@ -152,8 +185,93 @@ const App: React.FC = () => {
           <p className="text-lg md:text-xl text-stone-400 font-serif italic max-w-xl leading-relaxed">
             Ontdek de top 15 meest waargenomen soorten van deze maand, berekend op basis van recente natuur data (<a href="https://www.gbif.org/country/NL/summary" target="_blank" rel="noopener noreferrer" className="underline decoration-stone-600 hover:text-emerald-400 transition-colors">GBIF</a>, 2023-2025). Welke soorten kan je deze maand verwachten?
           </p>
+          
+          <button 
+            onClick={() => setShowInfo(true)}
+            className="mt-8 flex items-center gap-2.5 px-5 py-2.5 border border-white/20 rounded-full text-white/70 hover:text-white hover:border-white hover:bg-white/5 transition-all text-[10px] font-black uppercase tracking-widest group"
+          >
+            <Info size={14} className="text-emerald-500" />
+            Over deze tool
+          </button>
         </div>
       </section>
+
+      {/* Info Overlay */}
+      {showInfo && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-8 animate-fadeIn">
+          <div className="absolute inset-0 bg-stone-950/90 backdrop-blur-xl" onClick={() => setShowInfo(false)} />
+          <div className="relative bg-white w-full max-w-2xl max-h-[85vh] rounded-3xl shadow-2xl flex flex-col border border-stone-200 overflow-hidden">
+            {/* Sticky Close Button Container */}
+            <button 
+              onClick={() => setShowInfo(false)} 
+              className="absolute top-4 right-4 p-3 text-stone-400 hover:text-stone-900 transition-all active:scale-90 z-[110] bg-white/60 backdrop-blur-md rounded-full shadow-sm"
+            >
+              <X size={28} strokeWidth={2.5} />
+            </button>
+
+            {/* Scrollable Content Container */}
+            <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16">
+              <div className="mb-12">
+                <div className="h-1.5 w-12 bg-emerald-600 mb-6 rounded-full"></div>
+                <h2 className="text-4xl font-serif font-bold text-stone-900 tracking-tighter uppercase">Over deze tool</h2>
+              </div>
+              <div className="space-y-12">
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat doet deze tool?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    Deze tool visualiseert actuele biodiversiteitsdata voor elke locatie in Nederland. Het bundelt waarnemingen uit databases om een overzicht te geven van de meest voorkomende soorten van dit moment. Daarnaast koppelt het recente waarnemingsdata aan de officiële Rode Lijsten, om te zien welke soorten een bedreigde status hebben op nationaal of internationaal niveau.
+                  </p>
+                </div>
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waar komt de data vandaan?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    De data is afkomstig uit <a href="https://www.gbif.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-700">GBIF</a>, een internationale digitale database die natuurgegevens van over de hele wereld koppelt. Voor Nederland bevat dit gegevens van onder andere waarneming.nl, onderzoeksinstituten, universities en natuurbeschermingsorganisaties.
+                  </p>
+                </div>
+                <div ref={top15QuestionRef} className="animate-fadeIn scroll-mt-8">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Hoe wordt de top 15-soortenlijst samengesteld?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    De top 15 wordt berekend op basis van natuurdata van de afgelopen drie year (2023-2025). Per locatie wordt er in een gebied van circa 18x11 kilometer gekeken hoeveel unieke waarnemingen er voor elke soort zijn gedaan in de geselecteerde maand. De soorten die het vaakst zijn doorgegeven aan platforms zoals <a href="http://waarneming.nl/" target="_blank" rel="noopener noreferrer" className="underline hover:text-emerald-700">Waarneming.nl</a> en vervolgens in de internationale GBIF-database zijn beland, vormen de top 15.
+                  </p>
+                </div>
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom zie ik minder dan 15 soorten in de lijst staan?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    Dat kan gebeuren als er in de door jou gekozen maand en regio niet genoeg verschillende soorten zijn doorgegeven aan de database. De app toont alleen soorten die in de afgelopen drie jaar (2023-2025) daadwerkelijk zijn waargenomen. Vooral in de koude wintermaanden worden er minder insecten geregistreerd, waardoor de lijst korter kan zijn dan de maximaal 15 soorten. Daarnaast worden er in sommige gebieden soms minder soorten waargenomen en doorgegeven.
+                  </p>
+                </div>
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom staat een zeldzame soort hoog in de lijst?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    De top 15 wordt bepaald door het <em>aantal</em> waarnemingen in de database. Soms kan een zeldzame soort hoog eindigen. Dit kan bijvoorbeeld voorkomen wanneer een groep biologen onderzoek doet naar één specifieke zeldzame soort in de regio. Er komen dan in één keer heel veel meldingen in de database.
+                  </p>
+                </div>
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat is het waarnemingseffect?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    Het waarnemingseffect betekent dat de lijst niet alleen laat zien wat er in de natuur leeft, maar ook waar mensen graag naar kijken. Soorten die opvallen (zoals een felgekleurde vlinder) of op makkelijk bereikbare plekken zitten (zoals in een stadspark), worden vaker doorgegeven dan onopvallende soorten in afgelegen gebieden. Hierdoor staan 'populaire' soorten vaak hoger in de lijst dan soorten die wel veel voorkomen, maar minder vaak worden gemeld.
+                  </p>
+                </div>
+                <div ref={redListQuestionRef} className="animate-fadeIn scroll-mt-8">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Wat is het verschil tussen de Nederlandse rode lijst en die van de IUCN?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    De IUCN-status kijkt naar hoe het wereldwijd met een soort gaat. Een soort kan wereldwijd heel algemeen zijn (status: <em>Niet bedreigd</em>), maar in Nederland ontzettend zeldzaam of zelfs bijna verdwenen. De Nederlandse Rode Lijst is specifiek door de overheid opgesteld voor onze eigen natuur en bevat soorten die specifiek in Nederland zeldzaam zijn en/of sterk in aantal afnemen.
+                  </p>
+                </div>
+                <div className="animate-fadeIn">
+                  <h3 className="text-xl font-serif font-bold text-emerald-900 mb-3">Waarom zie ik soms een verouderde IUCN-status?</h3>
+                  <p className="text-stone-600 leading-relaxed font-serif italic text-lg border-l-4 border-stone-100 pl-6">
+                    Natuurdata is altijd in beweging. Er kan een vertraging optreden bij de synchronisatie tussen de bronorganisaties (IUCN) en de centrale databases van GBIF. De meest actuele status is ook te vinden op de officiële website van de IUCN of het Nederlands Soortenregister.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-16 pt-8 border-t border-stone-100">
+                <p className="text-[10px] font-black uppercase tracking-widest text-stone-300">Lokale Wildernis © 2025</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="sticky top-0 z-40 bg-stone-100 border-b border-stone-200 shadow-sm md:shadow-none">
         <div className="max-w-screen-xl mx-auto px-0 md:px-4 md:py-6">
@@ -244,7 +362,7 @@ const App: React.FC = () => {
                 <MapPin size={24} className="text-emerald-600" />
               </div>
               <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Kies een Locatie</h2>
-              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">Selecteer je locatie om lokale waarnemingen te ontdekken</p>
+              <p className="text-stone-400 font-serif italic text-lg max-sm text-center">Selecteer je locatie om lokale waarnemingen te ontdekken</p>
             </div>
           ) : !selectedMonth ? (
             <div className="py-24 md:py-32 flex flex-col items-center text-center animate-fadeIn">
@@ -252,7 +370,7 @@ const App: React.FC = () => {
                 <Calendar size={24} className="text-emerald-600" />
               </div>
               <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Selecteer Maand</h2>
-              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">Voor welke periode wilt u de lokale natuur bekijken?</p>
+              <p className="text-stone-400 font-serif italic text-lg max-sm text-center">Voor welke periode wilt u de lokale natuur bekijken?</p>
             </div>
           ) : !activeCategory ? (
             <div className="py-24 md:py-32 flex flex-col items-center text-center animate-fadeIn">
@@ -260,7 +378,7 @@ const App: React.FC = () => {
                 <CategoryIcon cat={null} size={24} className="text-emerald-600" />
               </div>
               <h2 className="text-4xl font-serif font-bold text-stone-900 mb-4 tracking-tighter uppercase">Kies een Categorie</h2>
-              <p className="text-stone-400 font-serif italic text-lg max-w-sm text-center">Selecteer hierboven wat je wilt ontdekken in {selectedCity.name}</p>
+              <p className="text-stone-400 font-serif italic text-lg max-sm text-center">Selecteer hierboven wat je wilt ontdekken in {selectedCity.name}</p>
             </div>
           ) : loading ? (
             <LoadingScreen />
@@ -275,18 +393,43 @@ const App: React.FC = () => {
                     <span className="text-[10px] font-black text-stone-400 uppercase tracking-widest">{MONTHS[selectedMonth - 1]}</span>
                   </div>
                 </div>
-                {isEndangeredCategory && (
-                  <button 
-                    onClick={() => setShowIucnLegend(!showIucnLegend)} 
-                    className="flex items-center gap-3 px-4 py-2 bg-stone-100 border border-stone-200 rounded-full text-stone-900 transition-all hover:bg-stone-200 hover:border-stone-300 group shadow-sm active:scale-95 shrink-0 w-fit"
-                  >
-                    <Info size={16} strokeWidth={2.5} className="text-stone-900 fill-stone-900/10" />
-                    <span className="text-[10px] font-black uppercase tracking-widest leading-none">Rode Lijstcategorieën</span>
-                    <div className={`transition-transform duration-300 ${showIucnLegend ? 'rotate-180' : ''}`}>
-                      <ChevronDown size={16} strokeWidth={3} className="text-stone-900" />
+                <div className="flex flex-wrap gap-2 sm:justify-end">
+                  {isEndangeredCategory && (
+                    <div className="flex flex-col gap-2 items-start sm:flex-row sm:items-center">
+                      <button 
+                        onClick={openRedListInfo}
+                        className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50/50 border border-emerald-100 rounded-2xl text-emerald-950 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5 group shadow-sm active:scale-95 shrink-0 w-fit cursor-pointer"
+                      >
+                        <div className="bg-emerald-600 rounded-full p-1 text-white group-hover:bg-emerald-700 transition-colors">
+                          <HelpCircle size={14} strokeWidth={2.5} />
+                        </div>
+                        <span className="text-sm font-serif font-bold italic tracking-tight leading-none">Uitleg Rode Lijst</span>
+                      </button>
+
+                      <button 
+                        onClick={() => setShowIucnLegend(!showIucnLegend)} 
+                        className="flex items-center gap-3 px-4 py-2 bg-stone-100 border border-stone-200 rounded-full text-stone-900 transition-all hover:bg-stone-200 hover:border-stone-300 group shadow-sm active:scale-95 shrink-0 w-fit"
+                      >
+                        <Info size={16} strokeWidth={2.5} className="text-stone-900 fill-stone-900/10" />
+                        <span className="text-[10px] font-black uppercase tracking-widest leading-none">Rode Lijstcategorieën</span>
+                        <div className={`transition-transform duration-300 ${showIucnLegend ? 'rotate-180' : ''}`}>
+                          <ChevronDown size={16} strokeWidth={3} className="text-stone-900" />
+                        </div>
+                      </button>
                     </div>
-                  </button>
-                )}
+                  )}
+                  {isTop15Category && (
+                    <button 
+                      onClick={openTop15Info}
+                      className="flex items-center gap-3 px-5 py-2.5 bg-emerald-50/50 border border-emerald-100 rounded-2xl text-emerald-950 transition-all duration-300 hover:bg-emerald-50 hover:border-emerald-300 hover:shadow-md hover:-translate-y-0.5 group shadow-sm active:scale-95 shrink-0 w-fit cursor-pointer"
+                    >
+                      <div className="bg-emerald-600 rounded-full p-1 text-white group-hover:bg-emerald-700 transition-colors">
+                        <HelpCircle size={14} strokeWidth={2.5} />
+                      </div>
+                      <span className="text-sm font-serif font-bold italic tracking-tight leading-none">Uitleg top 15</span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               {activeCategory === Category.ENDANGERED && !loading && speciesList.length > 0 && !showIucnLegend && (
@@ -362,7 +505,7 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-      <SpeciesDetail species={selectedSpecies} onClose={() => setSelectedSpecies(null)} />
+      <SpeciesDetail species={selectedSpecies} onClose={() => setSelectedSpecies(null)} activeCategory={activeCategory || undefined} />
     </div>
   );
 };

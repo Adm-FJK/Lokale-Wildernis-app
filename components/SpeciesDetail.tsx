@@ -13,7 +13,7 @@ interface Props {
   currentMonth?: number;
 }
 
-const SpeciesDetail: React.FC<Props> = ({ species, onClose }) => {
+const SpeciesDetail: React.FC<Props> = ({ species, onClose, activeCategory }) => {
   const [details, setDetails] = useState<SpeciesDetailType | null>(null);
   const [highResImage, setHighResImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -65,10 +65,12 @@ const SpeciesDetail: React.FC<Props> = ({ species, onClose }) => {
   const iucnCode = iucnCodeMatch ? iucnCodeMatch[1] : null;
   const iucnDetail = iucnCode ? IUCN_INFO[iucnCode] : null;
 
+  const isEndangeredNL = activeCategory === Category.ENDANGERED_NL;
+
   // Samengestelde status tekst bouwen
-  const fullStatusText = iucnDetail 
-    ? `${iucnDetail.label} / ${iucnDetail.english}` 
-    : species.conservationStatus;
+  const fullStatusText = (isEndangeredNL || !iucnDetail)
+    ? species.conservationStatus
+    : `${iucnDetail.label} / ${iucnDetail.english}`;
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-0 sm:p-6 transition-opacity duration-300 ${species ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
@@ -110,7 +112,7 @@ const SpeciesDetail: React.FC<Props> = ({ species, onClose }) => {
                       <ShieldAlert size={16} />
                       <span className="text-[10px] font-black uppercase tracking-widest">{fullStatusText}</span>
                     </div>
-                    {iucnDetail && (
+                    {iucnDetail && !isEndangeredNL && (
                       <p className="text-[11px] leading-snug text-stone-500 italic max-w-sm">
                         <span className="font-bold">Internationale IUCN-status ({iucnDetail.english}):</span> {iucnDetail.description}
                       </p>

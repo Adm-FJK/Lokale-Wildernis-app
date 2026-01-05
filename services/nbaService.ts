@@ -1,4 +1,3 @@
-
 import { GBIF_BASE_URL } from '../constants';
 import { SpeciesRecord } from '../types';
 import { fetchWikiImage, fetchWikiDutchData, normalizeScientificName } from './wikiService';
@@ -63,15 +62,14 @@ const mapNLStatus = (rawStatus: string): string => {
 let cachedRedListMap: Map<string, { status: string, link?: string }> | null = null;
 
 /**
- * Haalt de volledige Nederlandse Rode Lijst op via de jsDelivr CDN.
- * Dit gebeurt slechts één keer per sessie.
+ * Haalt de volledige Nederlandse Rode Lijst op via de jsDelivr CDN van de externe data-repo.
  */
 const getRedListNLMap = async (): Promise<Map<string, { status: string, link?: string }>> => {
   if (cachedRedListMap) return cachedRedListMap;
   
   try {
-    // Jouw nieuwe professionele CDN link
-    const CDN_URL = 'https://cdn.jsdelivr.net/gh/Adm-FJK/Lokale-Wildernis-app@main/data/redlist_full.json';
+    // Nieuwe CDN link naar de beveiligde data repository
+    const CDN_URL = 'https://cdn.jsdelivr.net/gh/Adm-FJK/Lokale-Wildernis-app-data@main/redlist_full.json';
     
     const response = await fetch(CDN_URL);
     if (!response.ok) throw new Error('CDN fetch failed');
@@ -119,7 +117,7 @@ export const fetchEndangeredSpecies = async (
   month: number,
   isDutchSpecific: boolean = false
 ): Promise<SpeciesRecord[]> => {
-  const range = 0.15; 
+  const range = 0.08; 
   const minLat = lat - range;
   const maxLat = lat + range;
   const minLng = lng - range;
@@ -127,11 +125,9 @@ export const fetchEndangeredSpecies = async (
 
   let url: string;
   if (isDutchSpecific) {
-    // Voor NL Rode Lijst scannen we een groter aantal soorten (10000) om matches te vinden in onze lokale lijst
     url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&facet=speciesKey&facetLimit=5000&limit=0`;
   } else {
-    // Voor internationale IUCN gebruiken we de ingebouwde GBIF filters
-    url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&iucn_red_list_category=CR&iucn_red_list_category=EN&iucn_red_list_category=VU&iucn_red_list_category=NT&facet=speciesKey&facetLimit=50&limit=0`;
+    url = `${GBIF_BASE_URL}/occurrence/search?country=NL&month=${month}&year=2023,2025&kingdomKey=1&decimalLatitude=${minLat},${maxLat}&decimalLongitude=${minLng},${maxLng}&iucn_red_list_category=CR&iucn_red_list_category=EN&iucn_red_list_category=VU&iucn_red_list_category=NT&facet=speciesKey&facetLimit=5000&limit=0`;
   }
 
   try {
@@ -141,10 +137,9 @@ export const fetchEndangeredSpecies = async (
     const facets = data.facets?.find((f: any) => f.field === 'SPECIES_KEY')?.counts || [];
     
     const finalResults: SpeciesRecord[] = [];
-    const maxMatches = 15; // We tonen de top 15 matches
     const batchSize = 100;
 
-    for (let i = 0; i < facets.length && finalResults.length < maxMatches; i += batchSize) {
+    for (let i = 0; i < facets.length; i += batchSize) {
       const batch = facets.slice(i, i + batchSize);
       const batchResults = await Promise.all(
         batch.map(async (facet: any) => {
@@ -198,7 +193,7 @@ export const fetchEndangeredSpecies = async (
       const validMatches = batchResults.filter((r): r is SpeciesRecord => r !== null);
       finalResults.push(...validMatches);
     }
-    return finalResults.slice(0, maxMatches);
+    return finalResults;
   } catch (error) { 
     console.error('Fetch endangered species error:', error);
     return []; 

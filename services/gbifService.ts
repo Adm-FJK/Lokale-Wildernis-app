@@ -10,7 +10,7 @@ export const fetchTopSpecies = async (
   lng: number,
   month: number
 ): Promise<(SpeciesRecord & { dutchName?: string })[]> => {
-  const range = 0.15;
+  const range = 0.08;
   const minLat = lat - range;
   const maxLat = lat + range;
   const minLng = lng - range;
