@@ -431,7 +431,7 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              {/* RESTORED: Legend block for endangered species */}
+              {/* Legend block for endangered species */}
               {isEndangeredCategory && showIucnLegend && (
                 <div className="mb-12 bg-white border border-stone-200 rounded-2xl p-6 md:p-10 shadow-xl animate-fadeIn">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 text-left">
@@ -465,7 +465,20 @@ const App: React.FC = () => {
                 </div>
               )}
 
-              {/* RESTORED: Winter month warning for insects */}
+              {/* Endangered Category Notes - Minimalist version */}
+              {activeCategory === Category.ENDANGERED_NL && (
+                <div className="mb-12 bg-stone-50 border-l-4 border-red-500 p-6 md:p-8 animate-fadeIn">
+                  <p className="text-base font-serif italic text-stone-600 leading-relaxed">Overzicht van soorten die op deze locatie zijn waargenomen en op de Nederlandse Rode Lijst staan</p>
+                </div>
+              )}
+
+              {activeCategory === Category.ENDANGERED && (
+                <div className="mb-12 bg-stone-50 border-l-4 border-red-500 p-6 md:p-8 animate-fadeIn">
+                  <p className="text-base font-serif italic text-stone-600 leading-relaxed">Overzicht van soorten met een internationaal bedreigde status (IUCN) die op deze locatie zijn waargenomen</p>
+                </div>
+              )}
+
+              {/* Winter month warning for insects */}
               {isInsectCategory && isWinterMonth && (
                 <div className="mb-12 bg-stone-50 border-l-4 border-stone-300 p-6 md:p-8 flex items-start gap-4 md:gap-6 animate-fadeIn">
                   <Snowflake size={24} className="text-stone-400 shrink-0 mt-1" />
